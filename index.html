@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <title>LooPlayer</title>
+    </head>
+    <body>
+        <h1>LooPlayer - using for working BGM</h1>
+
+        <input type="text" id="videoId" placeholder="video id of YouTube"></input>
+        <input type="time" id="startTime"></input> ~ <input type="time" id="endTime"></input>
+        <button onclick="play()">Play</button><br>
+        
+        <div id="player"></div>
+
+        <script>
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            
+            var timer;
+            console.log(startTime, endTime);
+
+            function play() {        
+                var player;
+                let videoId = document.getElementById("videoId").value;
+
+               // 時間の値を取得
+                const startTimeStr = document.getElementById("startTime").value;
+                const endTimeStr = document.getElementById("endTime").value;
+
+                // 時間の値を分解して数値に変換
+                const [startMinutes, startSeconds] = startTimeStr.split(':').map(Number);
+                const [endMinutes, endSeconds] = endTimeStr.split(':').map(Number);
+
+                // 時間をミリ秒に変換
+                const startTime = (startMinutes * 60 + startSeconds);  
+                const endTime = (endMinutes * 60 + endSeconds);
+
+                console.log(videoId);
+                console.log(startTime, endTime);
+    
+                player = new YT.Player('player', {
+                    height: '390',
+                    width: '640',
+                    videoId: videoId, // 再生する動画のID
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+
+                // 4. プレーヤーの準備ができたらイベントを設定できる
+                function onPlayerReady(event) {
+                    player.seekTo(startTime);
+                    player.playVideo(); // 自動再生
+                }
+
+                // 5. プレーヤーの状態が変わったら呼ばれる
+                function onPlayerStateChange(event) {
+                    if (event.data == YT.PlayerState.PLAYING) {
+                        console.log("playing")
+                    } else if(event.data == YT.PlayerState.PAUSED) {
+                        console.log("stoping")
+                    }
+                }
+
+                // 5. プレーヤーの状態が変わったら呼ばれる
+                function onPlayerStateChange(event) {
+                    if (event.data == YT.PlayerState.PLAYING) {
+                        // 再生中のタイマーをセット
+                        timer = setInterval(checkTime, 1000);
+                    } else if(event.data == YT.PlayerState.PAUSED) {
+                        // 一時停止中はタイマーをクリア
+                        clearInterval(timer);
+                    }
+                }
+
+                // 経過時間を監視する関数
+                function checkTime() {                    
+                    // プレーヤーの現在の再生時間(秒)
+                    var currentTime = player.getCurrentTime();
+                    var limitSeconds = endTime;
+                    
+                    // 制限時間を超えたら動画を最初に戻す
+                    if (currentTime > limitSeconds) {
+                        player.seekTo(startTime);
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
