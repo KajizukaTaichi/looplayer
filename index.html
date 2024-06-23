@@ -78,9 +78,9 @@
 
                 // プレーヤーの準備ができたらイベントを設定できる
                 function onPlayerReady(event) {
-                    if (isNaN(startTime) || startTime > player.getDuration()) {
+                    if (isNaN(startTime) || startTime >= player.getDuration()) {
                         startTime = 0;
-                    } if (isNaN(endTime) || endTime > player.getDuration()) {
+                    } if (isNaN(endTime) || endTime >= player.getDuration()) {
                         endTime = player.getDuration() - 1;
                     }
                     console.log(startTime, endTime);
