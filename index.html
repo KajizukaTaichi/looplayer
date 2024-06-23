@@ -66,6 +66,8 @@
                 console.log(videoId);
                 console.log(startTime, endTime);
 
+                window.history.pushState(null, null, `${window.location.origin}${window.location.pathname}?id=${videoId}&start=${startTimeStr}&end=${endTimeStr}`);
+
                 var player = new YT.Player('player', {
                     height: '390',
                     width: '640',
@@ -130,7 +132,6 @@
                 return list;
             }
 
-
             function showList() {
                 document.getElementById("list").innerHTML = "";
                 document.getElementById("list").appendChild(createTable());
@@ -142,6 +143,7 @@
                 const start = document.getElementById("startTime").value;
                 const end = document.getElementById("endTime").value;
                 localStorage.setItem(key, [value, start, end]);
+
                 showList();
             }
 
