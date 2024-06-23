@@ -9,22 +9,21 @@
 
         <input type="text" id="videoId" name="id" placeholder="video id of YouTube">
         <input type="time" id="startTime" name="start"> ~ <input type="time" id="endTime"  name="end">
-        <button onclick="play()">Play</button><br>
+        <button onclick="play()">Play</button><button onclick="location.reload()">Reset</button><br>
         
         <div id="player"></div><br>
 
-        <h3>List</h3>
+        <h3>Play list</h3>
         <input type="text" id="key" name="key" placeholder="name of video id">
-        <button onclick="addList()">Add</button><br>
+        <button onclick="addList()">Add</button><button onclick="if (confirm('Is it okay to clear play list?')) {localStorage.clear();showList()}">Clear</button><br>
 
         <div id="list"></div>
 
         <script>
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
-            console.log(urlParams);
-
             const id = urlParams.get('id');
+
             if (id !== null) {
                 document.getElementById("videoId").value = id;
             }
@@ -45,10 +44,11 @@
             firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             
             var timer;
-            console.log(startTime, endTime);
+            var player;
 
-            function play() {        
-                var player;
+            console.log(urlParams);
+
+            function play() {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
                 let videoId = document.getElementById("videoId").value;
 
                 // 時間の値を取得
@@ -60,13 +60,13 @@
                 const [endMinutes, endSeconds] = endTimeStr.split(':').map(Number);
 
                 // 時間をミリ秒に変換
-                const startTime = (startMinutes * 60 + startSeconds);  
-                const endTime = (endMinutes * 60 + endSeconds);
+                let startTime = (startMinutes * 60 + startSeconds);  
+                let endTime = (endMinutes * 60 + endSeconds);
 
                 console.log(videoId);
                 console.log(startTime, endTime);
-    
-                player = new YT.Player('player', {
+
+                var player = new YT.Player('player', {
                     height: '390',
                     width: '640',
                     videoId: videoId, // 再生する動画のID
@@ -76,22 +76,20 @@
                     }
                 });
 
-                // 4. プレーヤーの準備ができたらイベントを設定できる
+                // プレーヤーの準備ができたらイベントを設定できる
                 function onPlayerReady(event) {
+                    if (isNaN(startTime)) {
+                        startTime = 0;
+                    } if (isNaN(endTime) || endTime > player.getDuration()) {
+                        endTime = player.getDuration() - 1;
+                    }
+                    console.log(startTime, endTime);
+
                     player.seekTo(startTime);
                     player.playVideo(); // 自動再生
                 }
 
-                // 5. プレーヤーの状態が変わったら呼ばれる
-                function onPlayerStateChange(event) {
-                    if (event.data == YT.PlayerState.PLAYING) {
-                        console.log("playing")
-                    } else if(event.data == YT.PlayerState.PAUSED) {
-                        console.log("stoping")
-                    }
-                }
-
-                // 5. プレーヤーの状態が変わったら呼ばれる
+                // プレーヤーの状態が変わったら呼ばれる
                 function onPlayerStateChange(event) {
                     if (event.data == YT.PlayerState.PLAYING) {
                         // 再生中のタイマーをセット
@@ -119,7 +117,7 @@
 
                 for (let i = 0; i < localStorage.length; i++) {
                     let item = document.createElement("li");
-                    item.textContent = `${i+1}. ${Object.keys(localStorage)[i]}: ${localStorage.getItem(Object.keys(localStorage)[i])}`;
+                    item.textContent = `${Object.keys(localStorage)[i]}`;
                     item.addEventListener("click", function() {
                         let value = localStorage.getItem(Object.keys(localStorage)[i]).split(",");
                         document.getElementById("videoId").value = value[0];
@@ -152,7 +150,10 @@
 
         <style>
             body {
-                padding: 5vh;
+                padding: 2vh;
+            }
+            button {
+                margin-right: 0.5vh;
             }
             br {
                 margin-bottom: 3vh;
