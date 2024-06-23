@@ -7,8 +7,8 @@
     <body>
         <h1>LooPlayer - using for working BGM</h1>
 
-        <input type="text" id="videoId" placeholder="video id of YouTube"></input>
-        <input type="time" id="startTime"></input> ~ <input type="time" id="endTime"></input>
+        <input type="text" id="videoId" placeholder="video id of YouTube">
+        <input type="time" id="startTime"> ~ <input type="time" id="endTime">
         <button onclick="play()">Play</button><br>
         
         <div id="player"></div>
@@ -81,10 +81,9 @@
                 function checkTime() {                    
                     // プレーヤーの現在の再生時間(秒)
                     var currentTime = player.getCurrentTime();
-                    var limitSeconds = endTime;
                     
                     // 制限時間を超えたら動画を最初に戻す
-                    if (currentTime > limitSeconds) {
+                    if (currentTime > endTime) {
                         player.seekTo(startTime);
                     }
                 }
