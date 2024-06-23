@@ -7,13 +7,32 @@
     <body>
         <h1>LooPlayer - using for working BGM</h1>
 
-        <input type="text" id="videoId" placeholder="video id of YouTube">
-        <input type="time" id="startTime"> ~ <input type="time" id="endTime">
+        <input type="text" id="videoId" name="id" placeholder="video id of YouTube">
+        <input type="time" id="startTime" name="start"> ~ <input type="time" id="endTime"  name="end">
         <button onclick="play()">Play</button><br>
         
         <div id="player"></div>
 
         <script>
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            console.log(urlParams);
+
+            const id = urlParams.get('id');
+            if (id !== null) {
+                document.getElementById("videoId").value = id;
+            }
+
+            const start = urlParams.get('start');
+            if (start !== null) {
+                document.getElementById("startTime").value = start;
+            }
+            
+            const end = urlParams.get('end');
+            if (end !== null) {
+                document.getElementById("endTime").value = end;
+            }
+            
             var tag = document.createElement('script');
             tag.src = "https://www.youtube.com/iframe_api";
             var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -89,5 +108,14 @@
                 }
             }
         </script>
+
+        <style>
+            body {
+                padding: 5vh;
+            }
+            br {
+                margin-bottom: 3vh;
+            }
+        </style>
     </body>
 </html>
