@@ -11,7 +11,12 @@
         <input type="time" id="startTime" name="start"> ~ <input type="time" id="endTime"  name="end">
         <button onclick="play()">Play</button><br>
         
-        <div id="player"></div>
+        <div id="player"></div><br>
+
+        <input type="text" id="key" name="key" placeholder="name of video id">
+        <button onclick="addList()">Add</button><br>
+
+        <div id="list"></div>
 
         <script>
             const queryString = window.location.search;
@@ -45,7 +50,7 @@
                 var player;
                 let videoId = document.getElementById("videoId").value;
 
-               // 時間の値を取得
+                // 時間の値を取得
                 const startTimeStr = document.getElementById("startTime").value;
                 const endTimeStr = document.getElementById("endTime").value;
 
@@ -107,6 +112,40 @@
                     }
                 }
             }
+
+            function createTable(tableData) {
+                let list = document.createElement("ul");
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    let item = document.createElement("li");
+                    item.textContent = `${i+1}. ${Object.keys(localStorage)[i]}: ${localStorage.getItem(Object.keys(localStorage)[i])}`;
+                    item.addEventListener("click", function() {
+                        let value = localStorage.getItem(Object.keys(localStorage)[i]).split(",");
+                        document.getElementById("videoId").value = value[0];
+                        document.getElementById("startTime").value = value[1];
+                        document.getElementById("endTime").value = value[2];
+                    });
+                    list.appendChild(item);
+                }
+                
+                return list;
+            }
+
+
+            function showList() {
+                document.getElementById("list").appendChild(createTable());
+            }
+
+            function addList() {
+                const key = document.getElementById("key").value;
+                const value = document.getElementById("videoId").value;
+                const start = document.getElementById("startTime").value;
+                const end = document.getElementById("endTime").value;
+                localStorage.setItem(key, [value, start, end]);
+                showList();
+            }
+
+            showList();
         </script>
 
         <style>
