@@ -36,6 +36,7 @@ function addList() {
   localStorage.setItem(key, [value, start, end]);
 
   showList();
+  document.getElementById("key").value = "";
 }
 
 document.addEventListener("DOMContentLoaded", showList);
