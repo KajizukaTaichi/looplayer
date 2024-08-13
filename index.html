@@ -1,165 +1,99 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
     <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" type="text/css" href="/style.css" />
         <title>LooPlayer</title>
+        <link
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
     </head>
     <body>
-        <h1>LooPlayer - using for working BGM</h1>
+        <div class="container mt-4">
+            <h1 class="">LooPlayer - using for working BGM etc</h1>
+            <p>&copy; 2024 梶塚太智. All rights reserved</p>
+            <hr class="my-4" />
 
-        <input type="text" id="videoId" name="id" placeholder="video id of YouTube">
-        <input type="time" id="startTime" name="start"> ~ <input type="time" id="endTime"  name="end">
-        <button onclick="play()">Play</button><button onclick="location.reload()">Reset</button><br>
-        
-        <div id="player"></div><br>
+            <div class="form-group">
+                <label for="videoId">YouTube Video ID:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="videoId"
+                    name="id"
+                    placeholder="Enter video ID"
+                />
+            </div>
 
-        <h3>Play list</h3>
-        <input type="text" id="key" name="key" placeholder="name of video id">
-        <button onclick="addList()">Add</button><button onclick="if (confirm('Is it okay to clear play list?')) {localStorage.clear();showList()}">Clear</button><br>
+            <div class="form-row mb-4">
+                <div class="col">
+                    <label for="startTime">Start Time:</label>
+                    <input
+                        type="time"
+                        class="form-control"
+                        id="startTime"
+                        name="start"
+                    />
+                </div>
+                <div class="col">
+                    <label for="endTime">End Time:</label>
+                    <input
+                        type="time"
+                        class="form-control"
+                        id="endTime"
+                        name="end"
+                    />
+                </div>
+            </div>
 
-        <div id="list"></div>
+            <button class="btn btn-primary" onclick="play()">Play</button>
+            <button class="btn btn-secondary" onclick="location.reload()">
+                Reset
+            </button>
 
-        <script>
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            const id = urlParams.get('id');
+            <input
+                style="margin-left: 10px"
+                type="checkbox"
+                name="hide"
+                onchange="var element = document.getElementById('player'); if (this.checked) {element.style.display = 'none'} else {element.style.display = 'block'}"
+            />
+            <label for="hide">Hide music video</label>
 
-            if (id !== null) {
-                document.getElementById("videoId").value = id;
-            }
+            <div id="player" class="mt-4 mb-4"></div>
+            <hr class="my-4" />
 
-            const start = urlParams.get('start');
-            if (start !== null) {
-                document.getElementById("startTime").value = start;
-            }
-            
-            const end = urlParams.get('end');
-            if (end !== null) {
-                document.getElementById("endTime").value = end;
-            }
-            
-            var tag = document.createElement('script');
-            tag.src = "https://www.youtube.com/iframe_api";
-            var firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            
-            var timer;
-            var player;
+            <h3 class="mt-4">Play List</h3>
+            <div class="form-group">
+                <label for="key">Video ID Name:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="key"
+                    name="key"
+                    placeholder="Enter video ID name"
+                />
+            </div>
 
-            console.log(urlParams);
+            <button class="btn btn-primary" onclick="addList()">Add</button>
+            <button
+                class="btn btn-danger"
+                onclick="showConfirm('Is it okay to clear play list?', function(result) {if (result) {localStorage.clear(); showList()}})"
+            >
+                Clear
+            </button>
 
-            function play() {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
-                let videoId = document.getElementById("videoId").value;
+            <div id="list" class="mt-4"></div>
+        </div>
 
-                // 時間の値を取得
-                const startTimeStr = document.getElementById("startTime").value;
-                const endTimeStr = document.getElementById("endTime").value;
+        <!-- Bootstrap JS and dependencies -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-                // 時間の値を分解して数値に変換
-                const [startMinutes, startSeconds] = startTimeStr.split(':').map(Number);
-                const [endMinutes, endSeconds] = endTimeStr.split(':').map(Number);
-
-                // 時間をミリ秒に変換
-                let startTime = (startMinutes * 60 + startSeconds);  
-                let endTime = (endMinutes * 60 + endSeconds);
-
-                console.log(videoId);
-                console.log(startTime, endTime);
-
-                window.history.pushState(null, null, `${window.location.origin}${window.location.pathname}?id=${videoId}&start=${startTimeStr}&end=${endTimeStr}`);
-
-                var player = new YT.Player('player', {
-                    height: '390',
-                    width: '640',
-                    videoId: videoId, // 再生する動画のID
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
-
-                // プレーヤーの準備ができたらイベントを設定できる
-                function onPlayerReady(event) {
-                    if (isNaN(startTime) || startTime >= player.getDuration()) {
-                        startTime = 0;
-                    } if (isNaN(endTime) || endTime >= player.getDuration()) {
-                        endTime = player.getDuration() - 1;
-                    }
-                    console.log(startTime, endTime);
-
-                    player.seekTo(startTime);
-                    player.playVideo(); // 自動再生
-                }
-
-                // プレーヤーの状態が変わったら呼ばれる
-                function onPlayerStateChange(event) {
-                    if (event.data == YT.PlayerState.PLAYING) {
-                        // 再生中のタイマーをセット
-                        timer = setInterval(checkTime, 1000);
-                    } else if(event.data == YT.PlayerState.PAUSED) {
-                        // 一時停止中はタイマーをクリア
-                        clearInterval(timer);
-                    }
-                }
-
-                // 経過時間を監視する関数
-                function checkTime() {                    
-                    // プレーヤーの現在の再生時間(秒)
-                    var currentTime = player.getCurrentTime();
-                    
-                    // 制限時間を超えたら動画を最初に戻す
-                    if (currentTime > endTime) {
-                        player.seekTo(startTime);
-                    }
-                }
-            }
-
-            function createTable(tableData) {
-                let list = document.createElement("ul");
-
-                for (let i = 0; i < localStorage.length; i++) {
-                    let item = document.createElement("li");
-                    item.textContent = `${Object.keys(localStorage)[i]}`;
-                    item.addEventListener("click", function() {
-                        let value = localStorage.getItem(Object.keys(localStorage)[i]).split(",");
-                        document.getElementById("videoId").value = value[0];
-                        document.getElementById("startTime").value = value[1];
-                        document.getElementById("endTime").value = value[2];
-                    });
-                    list.appendChild(item);
-                }
-                
-                return list;
-            }
-
-            function showList() {
-                document.getElementById("list").innerHTML = "";
-                document.getElementById("list").appendChild(createTable());
-            }
-
-            function addList() {
-                const key = document.getElementById("key").value;
-                const value = document.getElementById("videoId").value;
-                const start = document.getElementById("startTime").value;
-                const end = document.getElementById("endTime").value;
-                localStorage.setItem(key, [value, start, end]);
-
-                showList();
-            }
-
-            showList();
-        </script>
-
-        <style>
-            body {
-                padding: 2vh;
-            }
-            button {
-                margin-right: 0.5vh;
-            }
-            br {
-                margin-bottom: 3vh;
-            }
-        </style>
+        <script src="./player.js"></script>
+        <script src="./dialog.js"></script>
+        <script src="./list.js"></script>
     </body>
 </html>
